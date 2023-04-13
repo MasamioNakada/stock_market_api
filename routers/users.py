@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 
 from models.users_models import User
 
-from .utils import email_exists_db, db, encrypt_password, verify_password, generate_access_token
+from .utils import email_exists_db, db, encrypt_password, verify_password, generate_access_token, decode_token
 
 from jose import jwt
 from datetime import datetime, timedelta
@@ -35,7 +35,8 @@ async def create_user(user: User):
         data={
             "full_name":user.full_name,
             "email":user.email,
-            "password":encrypt_password(user.password)
+            "password":encrypt_password(user.password),
+            "active":True ## For testing purposes (If you want to test the email verification, change this to False)
         }
     )
 
@@ -84,8 +85,16 @@ async def get_access_token(credentials: HTTPBasicCredentials = Depends(security)
         content=res,
         status_code=status.HTTP_200_OK
     )    
+
+@router.get("/check_email/{token}")
+async def check_email(token:str):
+    '''Check email'''
+
+    user_data = decode_token(token)
     
-
+    db.update_one("users",{"email":user_data["email"]},{"active":True})
     
-
-
+    return JSONResponse(
+        content={"message":"User Activate"},
+        status_code=status.HTTP_200_OK
+    )

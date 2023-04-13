@@ -7,6 +7,8 @@ from jose import jwt
 from datetime import datetime, timedelta
 import requests
 
+from fastapi import HTTPException, status
+
 # mongo db connection
 db = MongoDb(
     url_conection=URL_MONGO,
@@ -41,11 +43,15 @@ def verify_token(token:str) -> bool:
     except:
         return False
 
+def decode_token(token:str) -> dict:
+    '''Decode token'''
+    return jwt.decode(token,SEED,algorithms=[ALGORITHM])
+
 def generate_access_token(sub:str,email:str,exp_days:int = 45 ) -> dict:
     '''Generate access token'''
 
     # Expiration time
-    expire = datetime.utcnow() + timedelta(days=45)
+    expire = datetime.utcnow() + timedelta(days=exp_days)
 
     # Create access token Fields
     access_token_fields = {
@@ -63,7 +69,7 @@ def generate_access_token(sub:str,email:str,exp_days:int = 45 ) -> dict:
 
     return {
         "access_token": access_token,
-        "exp": expire.strftime("%Y-%m-%d %H:%M:%S")
+        "exp": expire.strftime("%Y-%m-%d %H:%M:%S UTC")
     }
 
 def stock_data(symbol:str)->dict:
@@ -77,7 +83,15 @@ def stock_data(symbol:str)->dict:
         "apikey": ALPHA_VANTAGE_API_KEY
     }
 
-    full_data = requests.get(ALPHA_URL,params=params).json()["Time Series (Daily)"]
+    data = requests.get(ALPHA_URL,params=params).json()
+
+    if data.get('Error Message') != None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=data["Error Message"])
+    
+    if data.get("Note") != None:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS,detail="Too many requests, please try again later, 5 calls per minute")
+
+    full_data = data["Time Series (Daily)"]
 
     now , yesterday = tuple(full_data.keys())[:2]
 
