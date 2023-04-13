@@ -12,8 +12,16 @@ Api that retrieves stock market data from [alphavantage](https://www.alphavantag
 - user activity
 - Retrieve logs from the api
 
+## Technologies
+- FastApi
+- Docker
+- Google Cloud Run
+- MongoDB
+
+![](https://cdn.discordapp.com/attachments/979914024173072424/1095967596442034267/image.png)
 
 ## Installation
+
 Clone the repository
 ```bash
 git clone https://github.com/MasamioNakada/stock_market_api.git
@@ -28,6 +36,13 @@ Run the docker image
 ```bash
 docker run -p 8000:8000 stock_market_api:latest
 ```
+Note your server needs this environment variables to run the api:
+- URL_MONGO="mongo url"
+- SEED="something random" (preferably a long string)
+- ALGORITHM="jwt algorithm used to encrypt the token"
+- ENCRYPT="encryption algorithm used to encrypt the password"
+- ALPHA_VANTAGE_API_KEY="alpha vantage api key"
+- ALPHA_URL="https://www.alphavantage.co/query"
 
 ## API
 Actually the api is running on a docker container, in a serverless environment, so you can use the api by sending requests to the following url: [https://stock-market-api-nla3j7erha-uc.a.run.app](https://stock-market-api-nla3j7erha-uc.a.run.app)
@@ -201,3 +216,16 @@ The user activity is stored in a database, so you can check the user activity by
 
 Note:
 - The best way to store the user activity is in a structured database like a relational database, but for demo porpuses I used a NoSQL database.
+
+
+## Database
+
+The database is hosted in MongoDB Atlas. Is composed by 2 collections:
+
+| Collection    | Description                  |
+|---------------|------------------------------|
+| users         | Stores the user information  |
+| record        | Stores the user activity     |
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)
