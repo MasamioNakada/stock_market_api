@@ -69,9 +69,6 @@ def generate_access_token(sub:str,email:str,exp_days:int = 45 ) -> dict:
 def stock_data(symbol:str)->dict:
     '''Get stock data'''
 
-    now = datetime.now().strftime("%Y-%m-%d")
-    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-
     #Define params
     params = {
         "function":"TIME_SERIES_DAILY_ADJUSTED",
@@ -81,6 +78,9 @@ def stock_data(symbol:str)->dict:
     }
 
     full_data = requests.get(ALPHA_URL,params=params).json()["Time Series (Daily)"]
+
+    now , yesterday = tuple(full_data.keys())[:2]
+
     now_data = full_data[now]
     yesterday_close = full_data[yesterday]["4. close"]
 
