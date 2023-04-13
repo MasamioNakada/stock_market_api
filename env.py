@@ -1,5 +1,6 @@
 import os 
 
+# Load environment variables
 URL_MONGO=os.environ.get("URL_MONGO")
 SEED=os.environ.get("SEED")
 ALGORITHM=os.environ.get("ALGORITHM")

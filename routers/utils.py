@@ -83,18 +83,24 @@ def stock_data(symbol:str)->dict:
         "apikey": ALPHA_VANTAGE_API_KEY
     }
 
+    # Get data
     data = requests.get(ALPHA_URL,params=params).json()
 
+    # Check errors
     if data.get('Error Message') != None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=data["Error Message"])
     
+    # Check for many requests
     if data.get("Note") != None:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS,detail="Too many requests, please try again later, 5 calls per minute")
 
+    # Get value data
     full_data = data["Time Series (Daily)"]
 
+    # Get now and yesterday keys
     now , yesterday = tuple(full_data.keys())[:2]
 
+    # Get data from now and yesterday
     now_data = full_data[now]
     yesterday_close = full_data[yesterday]["4. close"]
 

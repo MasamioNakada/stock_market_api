@@ -8,16 +8,17 @@ from slowapi.util import get_remote_address
 
 from .utils import stock_data, verify_token, decode_token, db
 
-limiter = Limiter(key_func=get_remote_address)
-
-
-
+# Create the router
 router = APIRouter(
     prefix="/api",
     tags=["api"],
 )
 
+# Security for the endpoints 
 oauth2 = OAuth2PasswordBearer(tokenUrl="token")
+
+# Create limiter
+limiter = Limiter(key_func=get_remote_address)
 
 @router.get("/stock/{symbol}")
 @limiter.limit("1/second")
@@ -27,8 +28,10 @@ async def stocks(symbol:str,request:Request,token:str = Depends(oauth2)):
     if not verify_token(token):
         raise HTTPException(status_code=401,detail="Invalid token")
     
+    # Get user data
     user_data = decode_token(token)
 
+    # Check if user is active
     if not db.find_one("users",{"email":user_data["email"]})["active"]:
         raise HTTPException(status_code=401,detail="User not active, please verify your email")
 
