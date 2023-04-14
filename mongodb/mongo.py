@@ -23,3 +23,6 @@ class MongoDb():
     
     def update_one(self,collection:str,query:dict,data:dict):
         return self.database[collection].update_one(query,{"$set":data})
+    
+    def delete_one(self,collection:str,query:dict):
+        return self.database[collection].delete_one(query)

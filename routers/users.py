@@ -26,6 +26,7 @@ async def create_user(user: User):
         raise HTTPException(status_code=400,detail="Email already exists")
     
     # Create user
+    
     r = db.insert_one(
         collection="users",
         data={
@@ -61,7 +62,7 @@ async def get_access_token(credentials: HTTPBasicCredentials = Depends(security)
 
     # Check correct Credentials
     if not verify_password(credentials.username,credentials.password):
-        raise HTTPException(status_code=401,detail="Incorrect email or password")
+        raise HTTPException(status_code=401,detail="Invalid credentials")
     
     # Get user
     user = db.find_one("users",{"email":credentials.username})
